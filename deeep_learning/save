@@ -1,1 +1,11 @@
-best cnn model during our trainings was 3 training accuracy was 1
+Transfer learning 
+
+Training complete in 2m 49s
+Best epoch: 6
+Best val Acc: 0.920000
+Best val FPR: 0.140000
+Best val FPR: 0.020000
+Best val precision: 0.875000
+Best val recall: 0.980000
+
+
