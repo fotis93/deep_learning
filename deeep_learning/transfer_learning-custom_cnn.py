@@ -95,6 +95,8 @@ def train_model(vers,model, criterion, optimizer, scheduler, num_epochs=25):
     best_fpr = 0
     best_fnr = 0
     best_epoch = 0
+    best_precision = 0
+    best_recall =0 
 
     ####lists to keep track of statistics 
     train_acc_list= []
@@ -108,6 +110,12 @@ def train_model(vers,model, criterion, optimizer, scheduler, num_epochs=25):
 
     train_fnr_list = []
     test_fnr_list = []
+
+    train_precision_list =[]
+    test_precision_list =[]
+
+    train_recall_list =[]
+    test_recall_list =[]
 
 
     for epoch in range(num_epochs):
@@ -221,17 +229,26 @@ def train_model(vers,model, criterion, optimizer, scheduler, num_epochs=25):
             epoch_acc = running_corrects.double() / dataset_sizes[phase]
             FPR = False_positives/(False_positives + True_negatives)
             FNR = False_negatives/(False_negatives + True_positives)
+            precision = True_positives/(True_positives+False_positives)
+            recall = True_positives/(True_positives+False_negatives)
+
 
             if phase == "train":
                     train_acc_list.append(epoch_acc.item())
                     train_loss_list.append(epoch_loss)
                     train_fpr_list.append(FPR)
                     train_fnr_list.append(FNR)
+                    train_precision_list.append(precision)
+                    train_recall_list.append(recall)
+    
+
             else:
                     test_acc_list.append(epoch_acc.item())
                     test_loss_list.append(epoch_loss)
                     test_fpr_lsit.append(FPR)
                     test_fnr_list.append(FNR)
+                    test_precision_list.append(precision)
+                    test_recall_list.append(recall)
 
 
 
@@ -254,12 +271,15 @@ def train_model(vers,model, criterion, optimizer, scheduler, num_epochs=25):
                     best_fpr = FPR
                     best_fnr = FNR
                     best_model_wts = copy.deepcopy(model.state_dict())
-                    breakcount = 0
-                elif epoch_acc == best_acc and best_fpr < FPR:
+                    best_precision = precision
+                    best_recall =recall
+                elif epoch_acc == best_acc and best_fpr > FPR:
                     best_acc = epoch_acc
                     best_epoch = epoch
                     best_fpr = FPR
                     best_fnr = FNR
+                    best_precision = precision
+                    best_recall =recall
                     best_model_wts = copy.deepcopy(model.state_dict())
 
             '''if phase == 'val':
@@ -274,14 +294,18 @@ def train_model(vers,model, criterion, optimizer, scheduler, num_epochs=25):
     print(f'Best val Acc: {best_acc:4f}')
     print(f'Best val FPR: {best_fpr:4f}')
     print(f'Best val FPR: {best_fnr:4f}')
+    print(f'Best val precision: {best_precision:4f}')
+    print(f'Best val recall: {best_recall:4f}')
+
 
     #######training graphs 
     path = 'deeep_learning/graphs'
     epochs = [i for i in range(25)]
 
-    train_l = [train_acc_list,train_loss_list,train_fpr_list,train_fnr_list]
-    test_l = [test_acc_list,test_loss_list,test_fpr_lsit,test_fnr_list]
-    name_l =["accuracy","loss","FPR","FNR"]
+    train_l = [train_acc_list,train_loss_list,train_fpr_list,train_fnr_list,train_precision_list,train_recall_list]
+    test_l = [test_acc_list,test_loss_list,test_fpr_lsit,test_fnr_list,test_precision_list,test_recall_list]
+    name_l =["accuracy","loss","FPR","FNR","precision","recall"]
+
 
     #####################################################################################
     ####train graphs 

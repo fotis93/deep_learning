@@ -193,6 +193,9 @@ def triplet_creation(emb1,emb0):
         #triplets.append(triplet)
     return(triplets)
 
+def init_weights(m):
+    if isinstance(m, nn.Conv2d):
+        torch.nn.init.kaiming_normal_(m.weight)
 
 data_transforms = {
     'train': transforms.Compose([
@@ -228,10 +231,11 @@ custom = torch.utils.data.DataLoader(image_datasets['train'], batch_size=4,
 ############################### trainings the network ###########################################
 
 
-def train(model, criterion, optimizer,scheduler,num_epochs=25):
+def train(model, criterion, optimizer,num_epochs=25):
     model.train()
     ###using the tripletloss loss function 
     for epoch in range(num_epochs):
+        running_loss = []
         print(f'Epoch {epoch}/{num_epochs - 1}')
         print('-' * 10)
 
@@ -259,18 +263,7 @@ def train(model, criterion, optimizer,scheduler,num_epochs=25):
                     for dato in batch:
                         dato = dato.to(device)
                         inputs.append(dato)
-                    #########print(len(inputs))
-                    #########print()
-                    #print(fotis)
-                    '''print(inputs[0].size())
-                    print(inputs[1].size())
-                    print(inputs[2].size())
-                    print(len(inputs[0]))
-                    print(inputs[0][0].size())
-                    print(inputs[1][0].size())
-                    print(inputs[2][0].size())'''
-                    #print(fotis)
-                    
+
                     # zero the parameter gradients
                     #optimizer.zero_grad()
 
@@ -295,25 +288,16 @@ def train(model, criterion, optimizer,scheduler,num_epochs=25):
                             loss= criterion(anchors,positives,hard_negatives)
                             loss.backward()
                             optimizer.step()
-                            scheduler.step()
+                            #scheduler.step()
                             optimizer.zero_grad()
                             #print(loss)
+                            running_loss.append(loss.cpu().detach().numpy())
                         #for param in model.parameters():
                             #print(param.data)
                             
                         #print(loss)
-                        #loss.backward()
-                        #optimizer.step()
-                        #scheduler.step()
-
-                        '''print("metrics for train set")
-                        test(model,5,image_datasets['train'])
-                        print("metrics for test set")
-                        test(model,5,image_datasets['val'])
-                        print()'''
-                        #newmodel = copy.deepcopy(model).requires_grad_(False)
-
-
+        print("running loss")
+        print(np.mean(running_loss))
         print("epoch accuracy on train set")
         test(model,1,image_datasets['train'])
 
@@ -407,13 +391,15 @@ print(device)
 
 
 # Parameters of newly constructed modules have requires_grad=True by default
-Mode = SiameseNetwork().to(device)
-criterion= nn.TripletMarginLoss(margin= 2, p=2)
-optimizer_conv = optim.SGD(Mode.parameters(), lr=0.05, momentum=0.9)
+Mode = SiameseNetwork()
+Mode.apply(init_weights)
+Mode = Mode.to(device)
+criterion= nn.TripletMarginLoss(margin= 1, p=2)
+optimizer_conv = optim.Adam(Mode.parameters(), lr=0.00005)
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_conv, step_size=7, gamma=0.1)
 
 
-model2 = train(Mode, criterion, optimizer_conv,exp_lr_scheduler,
+model2 = train(Mode, criterion, optimizer_conv,
                           num_epochs=25)
 
 #print(offline_training(image_datasets['train'],4,Mode))
