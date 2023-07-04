@@ -65,8 +65,6 @@ data_transforms = {
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ]),
 }
-current_directory = os.getcwd()
-print(current_directory)
 data_dir = "deeep_learning/IDphotos"
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                           data_transforms[x])

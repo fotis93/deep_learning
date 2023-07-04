@@ -19,7 +19,6 @@ import torch.nn.functional as F
 
 
 cudnn.benchmark = True
-plt.ion()   # interactive mode
 
 
 class TripletLoss(nn.Module):
@@ -79,7 +78,7 @@ class SiameseNetwork(nn.Module):
         output = F.relu(self.fc2(output))
         return output
    
-def online_training(batch,newmodel):
+def random_training(batch,newmodel):
     #creating a dummy copy of my data to operate upon(maybe not neccessary but i am not taking any chances )
     with torch.no_grad():
 
@@ -91,79 +90,33 @@ def online_training(batch,newmodel):
         one_len = (len(ones))
         zero_len = (len(zeros))
 
-        if one_len <2 or zero_len <2 :
-            return "next"
-        
-
-        images_1=torch.stack(ones)
-        images_0=torch.stack(zeros)
-
-        images_11=copy.deepcopy(images_1).detach()
-        images_01=copy.deepcopy(images_0).detach()
-
-        #creating the embeddings for the images 
-        ###adding the [0] for the list return of my custom model
-
-        newmodel1 = copy.deepcopy(newmodel).requires_grad_(False)   
-
-        
-        #print(images_11.size())
-        embedding_0 = newmodel1(images_01).detach()
-        embedding_1 = newmodel1(images_11).detach()
-        #print(embedding_1.size())
-        #print(embedding_0.size())
-
-        #print(fotis)
-
-        mean0, std0 = torch.mean(embedding_0), torch.std(embedding_0)
-        mean1, std1 = torch.mean(embedding_1), torch.std(embedding_1)
-
-        embedding_0=(embedding_0-mean0)/std0
-        embedding_1=(embedding_1-mean1)/std1
-        
-        ##using [0] because it is a tensor in a tensor 
-        zero_anchor_triplets = (triplet_creation(embedding_0,embedding_1))
-        #print()
-        one_anchor_triplets = (triplet_creation(embedding_1,embedding_0))
-
         anchors = []
         positives = []
         negatives = []
 
-        #print(zero_anchor_triplets)
-
-        ###appending the zero anchor triplets 
-        # for class zero
-        for triplet in zero_anchor_triplets:
-            '''print(triplet)
-            print("zeros")
-            print(len(zeros))
-            print(zeros)
-            print("ones")
-            print(ones)
-            print(len(ones))'''
-
-            #print(zeros)
-            #print(triplet[0])
-            anchors.append(zeros[triplet[0]])
-            positives.append(zeros[triplet[1]])
-            negatives.append(ones [triplet[2]])
-
-        ###appending the one anchor triplets 
-        ## for class one
-        for triplet in one_anchor_triplets:
-            '''print(triplet)
-            print("zeros")
-            print(len(zeros))
-            print(zeros)
-            print("ones")
-            print(ones)
-            print(len(ones))'''
-            anchors.append(ones[triplet[0]])
-            positives.append(ones[triplet[1]])
-            negatives.append(zeros [triplet[2]])
-
+        #random creation of triplets 
         
+        length = one_len+zero_len
+
+        ###for zero class
+        for i in range(3*length):
+            anchor = ones[random.randint(0, one_len-1)]
+            anchors.append(anchor)
+            positive = ones[random.randint(0, one_len-1)]
+            positives.append(positive)
+            negative = zeros[random.randint(0, zero_len-1)]
+            negatives.append(negative)
+
+        ###for one class
+        for i in range(3*length):
+            anchor = zeros[random.randint(0, zero_len-1)]
+            anchors.append(anchor)
+            positive = zeros[random.randint(0, zero_len-1)]
+            positives.append(positive)
+            negative = ones[random.randint(0, one_len-1)]
+            negatives.append(negative) 
+
+
         anchors = torch.stack(anchors)
         positives = torch.stack(positives)
         negatives = torch.stack(negatives)
@@ -175,56 +128,7 @@ def online_training(batch,newmodel):
 
     return (anchors,positives,negatives)
 
-def triplet_creation(emb1,emb0):
-    triplets = []
-    for i in range(len(emb1)):
-        anchor = emb1[i]
-        #print(anchor)
 
-        pos_matrix = emb1-anchor
-        pos_dist = torch.matmul(pos_matrix, pos_matrix.t())
-        pos_sq_dist=pos_dist.diagonal()
-        ###location of hard positive 
-        hard_pos = torch.argmax(pos_sq_dist)
-        hp = torch.max(pos_sq_dist)
-
-        neg_matrix = emb0 - anchor 
-        neg_dist = torch.matmul(neg_matrix, neg_matrix.t())
-        neg_sq_dist=neg_dist.diagonal()
-        ####checking for semihard negatives if they do not exist i will use the hard negatives 
-        semi_hard_lis = (neg_sq_dist>hp)
-        semi_hard_lis=semi_hard_lis.tolist()
-
-        index_list = range(len(semi_hard_lis))
-        mask = semi_hard_lis
-        semi_h = list(compress(index_list, mask))
-        '''print(index_list)
-        print(mask)
-        print(semi_h)'''
-        if len(semi_h)==0:
-            hard_neg = torch.argmin(neg_sq_dist)
-            triplet=[i,hard_pos.item(),hard_neg.item()]
-            triplets.append(triplet)
-        else:
-            for j in semi_h:
-                semi_hard_neg = j
-                triplet=[i,hard_pos.item(),semi_hard_neg]
-                triplets.append(triplet)
-
-
-
-        #for item in table :
-
-
-        #print(fotis)
-        ####.tem to get the number out of the tensor
-        #triplet=[i,hard_pos.item(),hard_neg.item()]
-        #triplets.append(triplet)
-    return(triplets)
-
-def init_weights(m):
-    if isinstance(m, nn.Conv2d):
-        torch.nn.init.kaiming_normal_(m.weight)
 
 data_transforms = {
     'train': transforms.Compose([
@@ -277,7 +181,7 @@ def train(model, criterion, optimizer,num_epochs=25):
 
                 ##########print(len(collate(data)))
 
-                batch = online_training(batch,Mode)
+                batch = random_training(batch,Mode)
                 #print(batch)
                 
                 #newmodel = copy.deepcopy(model).requires_grad_(False)
@@ -329,6 +233,8 @@ def train(model, criterion, optimizer,num_epochs=25):
         print(np.mean(running_loss))
         print("epoch accuracy on train set")
         test(model,1,image_datasets['train'])
+        print("epoch accuracy on test set")
+        test(model,1,image_datasets['val'])
 
 
 
@@ -421,7 +327,6 @@ print(device)
 
 # Parameters of newly constructed modules have requires_grad=True by default
 Mode = SiameseNetwork()
-Mode.apply(init_weights)
 Mode = Mode.to(device)
 criterion=  torch.jit.script(TripletLoss())
 optimizer_conv = optim.Adam(Mode.parameters(), lr=0.00005)
@@ -431,8 +336,5 @@ exp_lr_scheduler = lr_scheduler.StepLR(optimizer_conv, step_size=7, gamma=0.1)
 model2 = train(Mode, criterion, optimizer_conv,
                           num_epochs=25)
 
-#print(offline_training(image_datasets['train'],4,Mode))
-
-#print(len(image_datasets['train'])/20)
 
 
