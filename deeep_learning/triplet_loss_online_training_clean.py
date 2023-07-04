@@ -19,7 +19,6 @@ import torch.nn.functional as F
 
 
 cudnn.benchmark = True
-plt.ion()   # interactive mode
 
 
 class TripletLoss(nn.Module):
@@ -376,7 +375,7 @@ def test (model,dist,dataset):
             corrects+=1
     #this is the true accepts as in the paper 
     True_accepts = corrects/Psame
-    print("True_accepts")
+    print("VAL")
     print(True_accepts)
 
     # calculating the size of all the different pairs pos - neg 
@@ -394,7 +393,7 @@ def test (model,dist,dataset):
                 false_ac+=1
     False_accepts = false_ac/Pdiff
 
-    print("False_accepts")
+    print("FAR")
     print(False_accepts)
     print()
     

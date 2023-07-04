@@ -236,6 +236,8 @@ def train(model, criterion, optimizer,num_epochs=25):
         print("epoch accuracy on test set")
         test(model,1,image_datasets['val'])
 
+        torch.save(model,f'deeep_learning/triplet_random_models/model_{epoch}')
+
 
 
     return model
@@ -277,7 +279,7 @@ def test (model,dist,dataset):
             corrects+=1
     #this is the true accepts as in the paper 
     True_accepts = corrects/Psame
-    print("True_accepts")
+    print("VAL")
     print(True_accepts)
 
     # calculating the size of all the different pairs pos - neg 
@@ -295,7 +297,7 @@ def test (model,dist,dataset):
                 false_ac+=1
     False_accepts = false_ac/Pdiff
 
-    print("False_accepts")
+    print("FAR")
     print(False_accepts)
     print()
     

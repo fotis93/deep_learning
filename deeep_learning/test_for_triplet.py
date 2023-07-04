@@ -167,7 +167,7 @@ Test = []
 
 # Parameters of newly constructed modules have requires_grad=True by default
 for i in range(25):
-    Mode = torch.load(f'deeep_learning/triplet_selection_models/model_{i}')
+    Mode = torch.load(f'deeep_learning/triplet_random_models/model_{i}')
     Mode = Mode.to(device)
     Mode.eval()
     count = 0.2
