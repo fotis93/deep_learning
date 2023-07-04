@@ -186,7 +186,7 @@ for i in range(25):
         print(Te[1],Tr[1])'''
         count+=0.5
 
-fields =["Epoch","distance","True_Accepts","False_Accepts"]
+fields =["Epoch","distance","VAL","FAR"]
 
 with open('Test.csv', 'w') as f:
      
