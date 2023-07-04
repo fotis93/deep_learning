@@ -262,6 +262,8 @@ custom = torch.utils.data.DataLoader(image_datasets['train'], batch_size=4,
 
 def train(model, criterion, optimizer,num_epochs=25):
     model.train()
+    loss_list=[]
+
     ###using the tripletloss loss function 
     for epoch in range(num_epochs):
         running_loss = []
@@ -325,14 +327,17 @@ def train(model, criterion, optimizer,num_epochs=25):
                             #print(param.data)
                             
                         #print(loss)
+        loss_list.append(np.mean(running_loss))
         print("running loss")
         print(np.mean(running_loss))
         print("epoch accuracy on train set")
         test(model,1,image_datasets['train'])
 
+        torch.save(model,f'deeep_learning/triplet_selection_models/model_{epoch}')
 
 
-    return model
+
+    return model,loss_list
 
 def test (model,dist,dataset):
     model.eval()
@@ -429,7 +434,7 @@ exp_lr_scheduler = lr_scheduler.StepLR(optimizer_conv, step_size=7, gamma=0.1)
 
 
 model2 = train(Mode, criterion, optimizer_conv,
-                          num_epochs=25)
+                          num_epochs=25)[0]
 
 #print(offline_training(image_datasets['train'],4,Mode))
 
