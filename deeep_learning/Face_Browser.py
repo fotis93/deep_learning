@@ -37,7 +37,7 @@ vid.release()
 # Destroy all the windows
 cv2.destroyAllWindows()
 
-
+####loading the transfer learning model 
 PATh1 = 'deeep_learning/IDnetwork/model_weights.pth'
 #####using the same model as in training
 model = torchvision.models.resnet18(weights='IMAGENET1K_V1')

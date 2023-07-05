@@ -18,7 +18,7 @@ while(count<300):
 	ret, frame = vid.read()
 	
 	if ( (count%3) == 0):
-		path = '/home/fotis/IDphotos'
+		path = 'deeep_learning/IDphotos'
 
 		if (count2!=3):
 			pathtowrite = os.path.join(path, 'train' , "frame%d.jpg" % count)

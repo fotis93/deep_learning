@@ -236,7 +236,7 @@ def train(model, criterion, optimizer,num_epochs=25):
         print("epoch accuracy on test set")
         test(model,1,image_datasets['val'])
 
-        torch.save(model,f'deeep_learning/triplet_random_models/model_{epoch}')
+        #torch.save(model,f'deeep_learning/triplet_random_models/model_{epoch}')
 
 
 
@@ -336,7 +336,7 @@ exp_lr_scheduler = lr_scheduler.StepLR(optimizer_conv, step_size=7, gamma=0.1)
 
 
 model2 = train(Mode, criterion, optimizer_conv,
-                          num_epochs=25)
+                          num_epochs=75)
 
 
 

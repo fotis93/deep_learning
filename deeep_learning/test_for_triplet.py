@@ -166,8 +166,9 @@ Train = []
 Test = []
 
 # Parameters of newly constructed modules have requires_grad=True by default
-for i in range(25):
-    Mode = torch.load(f'deeep_learning/triplet_random_models/model_{i}')
+for i in range(50,75):
+    ###here we set the path where the triplet model are saved
+    Mode = torch.load(f'deeep_learning/IDnetwork/triplet_FaceNet_method')
     Mode = Mode.to(device)
     Mode.eval()
     count = 0.2
