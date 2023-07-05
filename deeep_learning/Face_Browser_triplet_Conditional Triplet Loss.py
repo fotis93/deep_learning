@@ -93,7 +93,7 @@ target_datasets =  datasets.ImageFolder(dir2, data_transforms)
 ###i want a 70% succes on the images i took in order to open the web 
 count=0
 sum =0
-dis = 1.7
+dis = 1
 target = target_datasets[75][0]
 vec_t = Mode(target.unsqueeze(0).to(device))
 #print(vec_t)
