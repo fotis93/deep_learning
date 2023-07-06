@@ -34,17 +34,14 @@ class TripletLoss(nn.Module):
         distance_positive = self.calc_euclidean(anchor, positive)
         distance_negative = self.calc_euclidean(anchor, negative)
         losses = torch.relu(distance_positive - distance_negative + self.margin)
-
-        if distance_positive >distance_negative+self.alpha:
-            losses = losses+ self.alpha * (distance_positive+distance_negative)/2
-        
-        diff = distance_positive - distance_negative
-
-        if diff<0 and diff > -self.margin:
-            losses = losses +self.alpha* (distance_positive-distance_negative)/2
-
-        if diff < self.margin and diff > -2*self.margin:
-            losses = losses +self.alpha* (distance_positive-distance_negative)/2
+        ###worst triplets
+        if distance_negative>distance_negative+self.margin:
+            losses = losses +self.alpha* (distance_positive+distance_negative)/2
+        ##best cases
+        k = 0.99
+        d = distance_positive - distance_negative
+        if d>self.margin*(k-1) and d< self.margin*(2*k-1): 
+            losses = losses -self.alpha* (distance_positive-distance_negative)/2
 
         return losses.mean()
 
@@ -236,7 +233,8 @@ def train(model, criterion, optimizer,num_epochs=25):
         print("epoch accuracy on test set")
         test(model,1,image_datasets['val'])
 
-        #torch.save(model,f'deeep_learning/triplet_random_models/model_{epoch}')
+        if epoch <25 or epoch >49:
+            torch.save(model,f'deeep_learning/triplet_random_models/model_{epoch}')
 
 
 
