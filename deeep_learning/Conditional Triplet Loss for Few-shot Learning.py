@@ -96,7 +96,7 @@ def random_training(batch,newmodel):
         length = one_len+zero_len
 
         ###for zero class
-        for i in range(3*length):
+        for i in range(length):
             anchor = ones[random.randint(0, one_len-1)]
             anchors.append(anchor)
             positive = ones[random.randint(0, one_len-1)]
@@ -105,7 +105,7 @@ def random_training(batch,newmodel):
             negatives.append(negative)
 
         ###for one class
-        for i in range(3*length):
+        for i in range(length):
             anchor = zeros[random.randint(0, zero_len-1)]
             anchors.append(anchor)
             positive = zeros[random.randint(0, zero_len-1)]
@@ -233,8 +233,8 @@ def train(model, criterion, optimizer,num_epochs=25):
         print("epoch accuracy on test set")
         test(model,1,image_datasets['val'])
 
-        if epoch <25 or epoch >49:
-            torch.save(model,f'deeep_learning/triplet_random_models/model_{epoch}')
+        #if epoch <25 or epoch >49:
+        #    torch.save(model,f'deeep_learning/triplet_random_models/model_{epoch}')
 
 
 
